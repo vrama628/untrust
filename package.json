@@ -8,12 +8,15 @@
   },
   "author": "Vijay Ramamurthy",
   "license": "MIT",
-  "dependencies": {
-    "sinon": "^1.17.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "mocha": "^2.5.3"
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vrama628/untrust.git"
   }
 }
