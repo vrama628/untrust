@@ -6,12 +6,14 @@ const EventEmitter = require('events');
 // object if you're already in a forked child process.
 module.exports = class Connection extends EventEmitter {
   constructor(conn) {
-    this.send = (...args) => {
-      if (args.length < 1 || typeof(args[0]) !== 'string') {
-        throw new TypeError('First argument to Runner.send() must be a string.');
-      }
-      conn.send({event: args});
-    };
-    conn.on('message', data => this.emit.apply(runner, data.event));
+    super();
+    this.send = function () {
+      return conn.send({
+        event: 'message',
+        args: Array.prototype.slice.call(arguments)
+      });
+    }
+    conn.on('message', data =>
+      this.emit.bind(this, data.event).apply(this, data.args));
   }
 }

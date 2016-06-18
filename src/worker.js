@@ -2,24 +2,33 @@
 
 const vm = require('vm'),
       fs = require('fs'),
-      Connection = require('./connection.js');
+      path = require('path'),
+      UpwardConnection = require('./upwardconnection.js');
 
 let code = process.argv[2], // consider changing to pipe or something
     dsl_path = process.argv[3];
 
-let conn = new Connection(process),
+let conn = new UpwardConnection(process),
     resolve = undefined,
-    reject = undefined;
-conn.result = new Promise((res, rej) => {
-  resolve = res;
-  reject = rej;
-});
-
-let sandbox = dsl_path ? {} : require(dsl_path)(conn);
-
+    reject = undefined,
+    result = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    }),
+    sandbox = {};
+    
 try {
-  let result = vm.runInNewContext(code, sandbox);
-  resolve(result);
+  sandbox = require(path.join(dsl_path))(conn, result);
 } catch (e) {
-  reject(e);
+  conn.error(e);
 }
+
+Promise.resolve(sandbox)
+.then(sandbox => {
+  vm.runInNewContext(code, sandbox);
+  resolve(sandbox);
+})
+.catch(e => {
+  reject(e);
+  conn.error(e);
+});
