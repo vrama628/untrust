@@ -1,9 +1,10 @@
 'use strict';
-let UpwardConnection = require('../../src/upwardconnection.js');
+let untrust = require('../..');
 
 module.exports = (uc, result) => {
   let instances = {
-    uc: uc instanceof UpwardConnection,
+    conn: uc instanceof untrust.Connection,
+    uc: uc instanceof untrust.UpwardConnection,
     result: result instanceof Promise
   }
   uc.send(instances);

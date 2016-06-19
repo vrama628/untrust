@@ -28,7 +28,7 @@ describe('untrust', function() {
     });
   });
 
-  describe('Connection instance', function () {
+  describe('#Connection instance', function () {
     it("emits 'message' when #send() is called on the corresponding Connection object.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_send.js'));
       dc.on('message', () => done());
@@ -61,8 +61,8 @@ describe('untrust', function() {
     });
   });
 
-  describe('DownwardConnection instance', function() {
-    it('is a subclass of Connection', function() {
+  describe('#DownwardConnection instance', function() {
+    it('is a Connection', function() {
       expect(untrust.DownwardConnection.prototype).to.be.an.instanceof(untrust.Connection);
     });
 
@@ -159,7 +159,14 @@ describe('untrust', function() {
     })
   });
 
-  describe('UpwardConnection instance', function() {
+  describe('#UpwardConnection instance', function() {
+    it("is a Connection", function(done) {
+      let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_instances.js'));
+      dc.on('message', instances => check(done, () => {
+        expect(instances.conn).to.be.true;
+      }))
+    })
+
     describe('#error()', function() {
       it("causes the corresponding DownwardConnection object to emit an 'error' event.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_errorFcn.js'));
