@@ -1,10 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect,
-      sinon = require('sinon'),
-      untrust = require('..'),
-      Connection = require('../src/connection.js'),
-      DownwardConnection = require('../src/downwardconnection.js');;
+      sinon = require('sinon');
+
+const untrust = require('..');
 
 function check(done, test) {
   try {
@@ -25,11 +24,11 @@ describe('untrust', function() {
     it("returns a DownwardConnection when called with two string arguments.", function () {
       let dc = untrust.run('foo', 'bar');
       dc.on('error', () => 0);
-      expect(dc).to.be.an.instanceof(DownwardConnection);
+      expect(dc).to.be.an.instanceof(untrust.DownwardConnection);
     });
   });
 
-  describe('Connection.prototype', function () {
+  describe('Connection instance', function () {
     it("emits 'message' when #send() is called on the corresponding Connection object.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_send.js'));
       dc.on('message', () => done());
@@ -62,9 +61,9 @@ describe('untrust', function() {
     });
   });
 
-  describe('DownwardConnection.prototype', function() {
+  describe('DownwardConnection instance', function() {
     it('is a subclass of Connection', function() {
-      expect(DownwardConnection.prototype).to.be.an.instanceof(Connection);
+      expect(untrust.DownwardConnection.prototype).to.be.an.instanceof(untrust.Connection);
     });
 
     it("emits 'exit' if the running code decides to exit.", function(done) {
@@ -160,7 +159,7 @@ describe('untrust', function() {
     })
   });
 
-  describe('UpwardConnection', function() {
+  describe('UpwardConnection instance', function() {
     describe('#error()', function() {
       it("causes the corresponding DownwardConnection object to emit an 'error' event.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_errorFcn.js'));

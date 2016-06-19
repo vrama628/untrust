@@ -26,5 +26,8 @@ function run(code, dsl_path) {
 }
 
 module.exports = {
-  run: run
+  run: run,
+  Connection: require('./connection.js'),
+  DownwardConnection: require('./downwardconnection.js'),
+  UpwardConnection: require('./upwardconnection.js')
 };
