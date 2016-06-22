@@ -1,6 +1,6 @@
 {
   "name": "untrust",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Run and communicate with untrusted javascript code through DSLs you define.",
   "main": "src/index.js",
   "scripts": {
