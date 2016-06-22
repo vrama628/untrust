@@ -7,30 +7,28 @@ const EventEmitter = require('events');
 module.exports = class Connection extends EventEmitter {
   constructor(conn) {
     super();
-    this.send = function () {
-      return conn.send({
-        event: 'message',
-        args: Array.prototype.slice.call(arguments)
-      });
-    }
+    this.send = message => conn.send({
+      event: 'message',
+      message: message
+    });
     this.message = this.send;
 
     conn.setMaxListeners(Infinity);
     let requestStack = [1];
-    this.request = function () {
+    this.request = request => {
       let id = requestStack.pop();
       if (requestStack.length === 0) {
         requestStack.push(id + 1);
       }
       conn.send({
         event: 'request',
-        args: Array.prototype.slice.call(arguments),
+        request: request,
         id: id
       });
       return new Promise((resolve, reject) => {
         conn.on('message', data => {
           if (data.event === 'response' && data.id === id) {
-            resolve(data.value);
+            resolve(data.response);
             requestStack.push(id);
           }
         });
@@ -40,19 +38,18 @@ module.exports = class Connection extends EventEmitter {
     conn.on('message', data => {
       switch (data.event) {
         case 'message':
-          this.emit.bind(this, 'message').apply(this, data.args);
+          this.emit('message', data.message);
           break;
         case 'error':
-          this.emit.bind(this, 'error').apply(this, data.args);
+          this.emit('error', data.error);
           break;
         case 'request':
           let respond = response => conn.send({
             event: 'response',
-            value: response,
+            response: response,
             id: data.id
           });
-          data.args.push(respond);
-          this.emit.bind(this, 'request').apply(this, data.args);
+          this.emit('request', data.request, respond);
           break;
         default:
           break;

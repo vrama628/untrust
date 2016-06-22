@@ -10,10 +10,10 @@ module.exports = class UpwardConnection extends Connection {
     super(conn);
     this.error = err => conn.send({ //TODO: copy whole error
       event: 'error',
-      args: [{
+      error: {
         message: err.message,
         stack: err.stack
-      }]
+      }
     });
   }
 }

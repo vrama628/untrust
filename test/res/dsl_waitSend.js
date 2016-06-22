@@ -1,6 +1,6 @@
 'use strict';
 
 module.exports = (uc) => {
-  setTimeout(() => uc.send('foo', 'bar', 'baz'), 250);
+  setTimeout(() => uc.send('bar'), 250);
   return {};
 }

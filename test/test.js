@@ -21,7 +21,7 @@ describe('untrust', function() {
       expect(() => untrust.run('var foo = 0;')).to.throw(Error);
     });
 
-    it("returns a DownwardConnection when called with two string arguments.", function () {
+    it("returns a DownwardConnection when called with two string arguments.", function() {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_empty.js'));
       expect(dc).to.be.an.instanceof(untrust.DownwardConnection);
     });
@@ -33,12 +33,10 @@ describe('untrust', function() {
       dc.on('message', () => done());
     });
 
-    it("passes the arguments that were passed to the corresponding #send() when it emits 'message'", function(done) {
+    it("passes the argument that was passed to the corresponding #send() when it emits 'message'", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_send.js'));
-      dc.on('message', (foo, bar, baz) => check(done, () => {
+      dc.on('message', foo => check(done, () => {
         expect(foo).to.equal('foo');
-        expect(bar).to.equal('bar');
-        expect(baz).to.equal('baz');
       }));
     });
 
@@ -47,31 +45,31 @@ describe('untrust', function() {
       dc.on('request', () => done());
     });
 
-    it("passes the arguments that were passed to the corresponding #request() when it emits 'request'.", function(done) {
+    it("passes the argument that was passed to the corresponding #request() when it emits 'request'.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_request.js'));
-      dc.on('request', (x, y) => check(done, () => {
-        expect(x).to.equal(2);
-        expect(y).to.equal(3);
+      dc.on('request', factors => check(done, () => {
+        expect(factors.x).to.equal(2);
+        expect(factors.y).to.equal(3);
       }));
     });
 
-    it("passes an additional, appended argument (a respond function) to the 'request' event.", function(done) {
+    it("passes a second argument (a respond function) to the 'request' event.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_request.js'));
-      dc.on('request', (x, y, respond) => check(done, () => {
+      dc.on('request', (factors, respond) => check(done, () => {
         expect(respond).to.be.a('function');
       }));
     });
 
     it("causes the Promise returned by the #request() call to be resolved when the respond function is called.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_request.js'));
-      dc.on('request', (x, y, respond) => respond(x * y));
+      dc.on('request', (factors, respond) => respond(factors.x * factors.y));
       dc.on('message', () => done());
     });
 
     it("causes the Promise returned by the #request() call to be resolved with the value passed into the respond function.", function(done) {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_request.js'));
-      dc.on('request', (x, y, respond) => respond(x * y));
-      dc.on('message', (response) => check(done, () => {
+      dc.on('request', (factors, respond) => respond(factors.x * factors.y));
+      dc.on('message', response => check(done, () => {
         expect(response).to.equal(6);
       }));
     });
@@ -83,10 +81,9 @@ describe('untrust', function() {
         dc.send('fooBar');
       });
 
-      it("causes the corresponding 'message' event to be emitted with the same arguments as passed in.", function(done) {
+      it("causes the corresponding 'message' event to be emitted with the same argument as passed in.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_receiveReply.js'));
-        dc.on('message', (received, fooBar) => check(done, () => {
-          expect(received).to.equal('received');
+        dc.on('message', fooBar => check(done, () => {
           expect(fooBar).to.equal('fooBar');
         }));
         dc.send('fooBar');
@@ -104,35 +101,35 @@ describe('untrust', function() {
       it("causes the corresponding Connection object to emit a 'request' event.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
         dc.on('message', () => done());
-        dc.request(4, 5)
+        dc.request({x: 4, y: 5})
       });
 
-      it("causes the corresponding 'request' event to be emitted with the arguments that were passed in.", function(done) {
+      it("causes the corresponding 'request' event to be emitted with the argument that was passed in.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
-        dc.on('message', (x, y) => check(done, () => {
-          expect(x).to.equal(4);
-          expect(y).to.equal(5);
+        dc.on('message', requested => check(done, () => {
+          expect(requested.x).to.equal(4);
+          expect(requested.y).to.equal(5);
         }));
-        dc.request(4, 5);
+        dc.request({x: 4, y: 5});
       });
 
       it("appends a function to the argument list of the triggered 'request' event.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
-        dc.on('message', (x, y, isFunction) => check(done, () => {
-          expect(isFunction).to.be.true;
+        dc.on('message', requested => check(done, () => {
+          expect(requested.isFunction).to.be.true;
         }));
-        dc.request(4, 5);
+        dc.request({x: 4, y: 5});
       });
 
       it("returns a Promise.", function() {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
-        let multPromise = dc.request(4, 5);
+        let multPromise = dc.request({x: 4, y: 5});
         expect(multPromise).to.be.an.instanceof(Promise);
       });
 
       it("resolves the returned Promise to the value passed into the corresponding respond function.", function(done) {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
-        let multPromise = dc.request(4, 5);
+        let multPromise = dc.request({x: 4, y: 5});
         multPromise.then(product => check(done, () => {
           expect(product).to.equal(20);
         }));
@@ -142,7 +139,7 @@ describe('untrust', function() {
         let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_response.js'));
         let multPromises = new Array(1000);
         for (let i = 0; i < multPromises.length; i++) {
-          multPromises[i] = dc.request(2, i);
+          multPromises[i] = dc.request({x: 2, y: i});
         }
         Promise.all(multPromises).then(mults => check(done, () => {
           mults.map((val, index) => expect(val).to.equal(2 * index));
@@ -254,7 +251,7 @@ describe('untrust', function() {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_instances.js'));
       dc.on('message', instances => check(done, () => {
         expect(instances.conn).to.be.true;
-      }))
+      }));
     })
 
     describe('#error()', function() {

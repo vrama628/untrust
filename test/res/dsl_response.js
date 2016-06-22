@@ -1,9 +1,13 @@
 'use strict';
 
 module.exports = (uc, result) => {
-  uc.on('request', (x, y, respond) => {
-    uc.send(x, y, typeof(respond) === 'function');
-    setTimeout(() => respond(x * y), Math.random() * 250);
+  uc.on('request', (factors, respond) => {
+    uc.send({
+      x: factors.x,
+      y: factors.y,
+      isFunction: typeof(respond) === 'function'
+    });
+    setTimeout(() => respond(factors.x * factors.y), Math.random() * 250);
   });
   return {};
 }
