@@ -4,7 +4,7 @@
   "description": "Run and communicate with untrusted javascript code through DSLs you define.",
   "main": "src/index.js",
   "scripts": {
-    "test": "node_modules\\.bin\\mocha"
+    "test": "node_modules/.bin/mocha"
   },
   "author": "Vijay Ramamurthy",
   "license": "MIT",

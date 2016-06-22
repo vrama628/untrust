@@ -3,7 +3,7 @@
 module.exports = (uc, result) => {
   uc.on('request', (x, y, respond) => {
     uc.send(x, y, typeof(respond) === 'function');
-    respond(x * y);
+    setTimeout(() => respond(x * y), Math.random() * 250);
   });
   return {};
 }
