@@ -6,7 +6,11 @@ const vm = require('vm'),
       UpwardConnection = require('./upwardconnection.js');
 
 let code = process.argv[2], // consider changing to pipe or something
-    dsl_path = process.argv[3];
+    dsl_path = process.argv[3],
+    arg = undefined;
+if (process.argv[4] !== undefined) {
+  arg = JSON.parse(process.argv[4]);
+}
 
 let conn = new UpwardConnection(process),
     resolve = undefined,
@@ -18,7 +22,7 @@ let conn = new UpwardConnection(process),
     sandbox = {};
     
 try {
-  sandbox = require(path.join(dsl_path))(conn, result);
+  sandbox = require(path.join(dsl_path))(conn, result, arg);
 } catch (e) {
   conn.error(e);
 }

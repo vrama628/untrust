@@ -25,6 +25,13 @@ describe('untrust', function() {
       let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_empty.js'));
       expect(dc).to.be.an.instanceof(untrust.DownwardConnection);
     });
+
+    it("can take a third parameter which it passes as the third argument to the DSL.", function(done) {
+      let dc = untrust.run('var foo = 0;', require.resolve('./res/dsl_arg.js'), {foo: 'bar'});
+      dc.on('message', arg => check(done, () => {
+        expect(arg.foo).to.equal('bar');
+      }));
+    });
   });
 
   describe('#Connection instance', function () {
