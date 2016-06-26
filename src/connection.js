@@ -13,8 +13,9 @@ module.exports = class Connection extends EventEmitter {
     });
     this.message = this.send;
 
-    conn.setMaxListeners(Infinity);
-    let requestStack = [1];
+    //conn.setMaxListeners(Infinity);
+    let requestStack = [1],
+        responseHandlers = [];
     this.request = request => {
       let id = requestStack.pop();
       if (requestStack.length === 0) {
@@ -26,12 +27,7 @@ module.exports = class Connection extends EventEmitter {
         id: id
       });
       return new Promise((resolve, reject) => {
-        conn.on('message', data => {
-          if (data.event === 'response' && data.id === id) {
-            resolve(data.response);
-            requestStack.push(id);
-          }
-        });
+        responseHandlers[id] = resolve;
       });
     }
 
@@ -50,6 +46,10 @@ module.exports = class Connection extends EventEmitter {
             id: data.id
           });
           this.emit('request', data.request, respond);
+          break;
+        case 'response':
+          responseHandlers[data.id](data.response);
+          requestStack.push(data.id);
           break;
         default:
           break;
